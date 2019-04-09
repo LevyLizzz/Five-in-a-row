@@ -1,0 +1,80 @@
+import java.util.List;
+
+public class MaxminTree {
+    private int DEPTH;
+    public static final int MAXN = 1<<28;
+    public static final int MINN = -MAXN;
+    private Node selectedNode;
+
+    public MaxminTree(int d){
+        this.DEPTH = d;
+    }
+    int count = 0;
+    public void initTree(int depth, int[][] chesses, Node node, int player){
+
+        for(int i = 0; i < chesses.length; i++){
+            for(int j = 0; j < chesses[i].length; j++){
+                if(chesses[i][j] == 0){
+                    int[][] newChesses = new int[chesses.length][chesses[i].length];
+                    // deep copy chesses
+                    for(int k = 0; k < newChesses.length; k++){
+                        System.arraycopy(chesses[k], 0, newChesses[k], 0, newChesses.length);
+                    }
+
+                    newChesses[i][j] = player;
+                    Node childNode = new Node(newChesses, player, i, j, node);
+                    count++;
+                    System.out.println("# of nodes: " + count);
+                    node.addChildNode(childNode);
+
+                    if(depth + 1 < DEPTH) {
+                        // switch player
+                        int newPlayer = (player == 1) ? 2 : 1;
+                        initTree(depth + 1, newChesses, childNode, newPlayer);
+                    }
+                }
+            }
+        }
+
+
+    }
+
+    public int maxmin(Node node, int depth, boolean isMaxinminizingPlayer, int alpha, int beta){
+        if(node.isLeaf()) return node.getValue();
+
+        if(isMaxinminizingPlayer){
+            int bestVal = MINN;
+            List<Node> childList = node.getChildList();
+            for(int i = 0; i < childList.size(); i++){
+                int value = maxmin(childList.get(i), depth + 1, false, alpha, beta);
+
+                if(bestVal < value && value > alpha){
+                    bestVal = value;
+                    this.selectedNode = childList.get(i);
+                }else{
+                    bestVal = Math.max(bestVal,value);
+                    alpha = Math.max(alpha, bestVal);
+                }
+
+                if(beta <= alpha) break;
+            }
+            return bestVal;
+        }else {
+            int bestVal = MAXN;
+            List<Node> childList = node.getChildList();
+            for(int i = 0; i < childList.size(); i++){
+                int value = maxmin(childList.get(i), depth + 1, true, alpha, beta);
+
+                bestVal = Math.min(value, bestVal);
+                beta = Math.min(alpha, bestVal);
+
+                if(beta <= alpha) break;
+            }
+            return bestVal;
+        }
+    }
+
+    public Node getSelectedNode(){
+        return this.selectedNode;
+    }
+}

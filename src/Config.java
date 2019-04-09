@@ -1,6 +1,4 @@
-/**
- * Created by LevyLi on 2019/4/2.
- */
+
 public interface Config {
     public static final int X = 50;
     public static final int Y = 40;

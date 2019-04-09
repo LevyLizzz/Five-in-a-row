@@ -6,6 +6,7 @@ public class ChessModel implements Config{
     private ArrayList<Listener> lisArr = new ArrayList<Listener>();
     private ArrayList<int[]> steps = new ArrayList<int[]>();
 
+
     public ChessModel(){
         for(int i = 0; i < LINE; i++){
             for(int j = 0; j < LINE; j++) {
@@ -25,6 +26,15 @@ public class ChessModel implements Config{
         this.steps.add(step);
         chessBoardChanged();
         if(checkGameOver(row, column)) gameOver(player);
+    }
+
+    public void setToAi(int row, int column, int player) {
+        setChess(row, column, player);
+
+        int aiPlayer = (player == 1) ? 2 : 1;
+        AiModel ai = new AiModel(aiPlayer, chesses);
+        int[] chesse = ai.getChess();
+        setChess(chesse[0], chesse[1], aiPlayer);
     }
 
     public void clear(){
@@ -57,7 +67,7 @@ public class ChessModel implements Config{
             } else break;
         }
 
-        return  (count == 5);
+        return  (count >= 5);
     }
 
     private boolean checkColumn(int x, int y) {
@@ -76,7 +86,7 @@ public class ChessModel implements Config{
             else
                 break;
         }
-        return (count == 5);
+        return (count >= 5);
     }
 
     private boolean checkOblique(int x, int y) {
@@ -93,7 +103,7 @@ public class ChessModel implements Config{
             }
             else break;
         }
-        if (count == 5) return true;
+        if (count >= 5) return true;
 
         count = 1;
         for(int i=1;x+i<chesses.length&&y+i<chesses.length;i++) {
@@ -111,7 +121,7 @@ public class ChessModel implements Config{
                 break;
         }
 
-        return  (count == 5);
+        return  (count >= 5);
     }
 
     private void chessBoardChanged(){
@@ -133,7 +143,7 @@ public class ChessModel implements Config{
         chessBoardChanged();
     }
 
-    public int [] [] getChess(){
+    public int [] [] getChesses(){
         return this.chesses;
     }
 }

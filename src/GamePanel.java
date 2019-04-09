@@ -12,7 +12,7 @@ public class GamePanel extends JPanel implements Config{
 
     public void paint(Graphics g) {
 //        g.clearRect(0 , 0, 800, 700);
-        int[][] chessBoard = model.getChess();
+        int[][] chessBoard = model.getChesses();
         this.setBackground(new Color(252, 210, 123));
         g.setColor(Color.black);
         for (int i = 0; i < LINE; i++) {

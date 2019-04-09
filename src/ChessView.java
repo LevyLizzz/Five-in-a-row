@@ -11,9 +11,9 @@ public class ChessView extends JPanel implements Listener{
     private GamePanel gp;
     private MouseAdapter mouse;
     private JLabel la;
+    private boolean isAi = false;
 
-    private boolean gameOn = true;
-    int turn = 0;
+    int turn = 1;
 
     public ChessView(ChessModel model, ChessController controller) {
         this.controller = controller;
@@ -27,6 +27,7 @@ public class ChessView extends JPanel implements Listener{
                 int x = (e.getX() - model.X + model.CHESS / 2) / model.SIZE;
                 int y = (e.getY() - model.Y + model.CHESS / 2) / model.SIZE;
                 run(x, y);
+
             }
         };
     }
@@ -96,27 +97,57 @@ public class ChessView extends JPanel implements Listener{
 
     // merge into privious code
     public void btnAction(String action) {
-        if (action.equals("2 Players Game") || action.equals("Restart")) {
+        if (action.equals("2 Players Game")) {
+            isAi = false;
             controller.start();
             turn = 1;
         } else if (action.equals("Play with AI")) {
-
+            isAi = true;
+            controller.start();
+            turn = 1;
         } else if (action.equals("Roll back")) {
-            model.rollBack();
-            turn --;
+            if(turn > 1){
+                if(isAi){
+                    model.rollBack();
+                    turn --;
+                    model.rollBack();
+
+                    turn --;
+                }else {
+                    model.rollBack();
+                    turn --;
+                }
+
+            }
+
+        } else if(action.equals("Restart")){
+            controller.start();
+            turn = 1;
         }
         gp.removeMouseListener(mouse);
         gp.addMouseListener(mouse);
     }
 
-    public void drawChessTable () {
-        Graphics g = this.getGraphics();
-        gp.paint(g);
-    }
 
     public void run(int x, int y){
-        if(gameOn){
-            //2 for black
+        if(isAi){
+            gp.removeMouseListener(mouse);
+            int player = turn % 2 + 1;
+
+            try {
+                controller.setToAi(x, y, player);
+            } catch (ChessController.ChessExistsException e) {
+                JOptionPane.showMessageDialog(null, "Chess Exists!");
+                turn --;
+            } catch (ArrayIndexOutOfBoundsException e) {
+                turn --;
+            }
+
+            turn += 2;
+
+            gp.addMouseListener(mouse);
+
+        } else {
             int player = turn % 2 + 1;
 
             try {
@@ -134,16 +165,16 @@ public class ChessView extends JPanel implements Listener{
 
     @Override
     public void showChange() {
-        int[][] chesses = model.getChess();
+        int[][] chesses = model.getChesses();
         gp.repaint();
-//        gp.paintChesss(chesses);
-        String player = (turn % 2) == 0 ? "Black" : "White";
+        gp.paintChesss(chesses);
+        String player = (turn % 2) == 0 ? "White" : "Black";
         la.setText("Current Turn: " + player);
     }
 
     @Override
     public void gameOver(int player) {
-        if (player == 1) {
+        if (player == 2) {
             JOptionPane.showMessageDialog(null, "Black Win!");
             gp.removeMouseListener(mouse);
         } else {

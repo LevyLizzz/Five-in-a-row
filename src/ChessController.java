@@ -1,8 +1,4 @@
-import java.awt.*;
 
-/**
- * Created by LevyLi on 2019/3/2.
- */
 public class ChessController {
     private ChessModel model;
 
@@ -11,8 +7,19 @@ public class ChessController {
  }
 
     public void setChess(int x, int y, int player) throws ArrayIndexOutOfBoundsException, ChessExistsException{
-        int[][] chessBoard = model.getChess();
+        int[][] chessBoard = model.getChesses();
         if(chessBoard[x][y] > 0) throw new ChessExistsException();
+        model.setChess(x, y, player);
+    }
+
+    public void setToAi(int x, int y, int player) throws ArrayIndexOutOfBoundsException, ChessExistsException{
+        int[][] chessBoard = model.getChesses();
+        if(chessBoard[x][y] > 0) throw new ChessExistsException();
+        model.setToAi(x, y, player);
+    }
+
+    public void setChessByAi(int x, int y, int player){
+        int[][] chessBoard = model.getChesses();
         model.setChess(x, y, player);
     }
 
