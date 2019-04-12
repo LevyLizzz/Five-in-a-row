@@ -11,21 +11,16 @@ public class AiModel implements Config{
     public AiModel(int player, int[][] chesses){
         this.player = player;
         this.chesses = chesses;
-        this.tree = new MaxminTree(searchDeep);
+        this.tree = new MaxminTree(searchDeep, chesses);
         this.root = new Node();
         tree.initTree(0, chesses, root, player);
     }
 
-    public int[][] getChesses(){
-        int value = tree.maxmin(root, 0, true, MINN, MAXN);
-        Node selectedNode = tree.getSelectedNode();
-        return selectedNode.getChesses();
-    }
 
     public int[] getChess(){
         int value = tree.maxmin(root, 0, true, MINN, MAXN);
-        Node selectedNode = tree.getSelectedNode();
-        Node node = selectedNode.getNthAncestor(searchDeep - 2);
+        Node node = tree.getSelectedNode();
+//        Node node = selectedNode.getNthAncestor(searchDeep - 2);
         int[] chesse = {node.x, node.y};
         return chesse;
     }
