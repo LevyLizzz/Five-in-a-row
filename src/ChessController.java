@@ -18,20 +18,14 @@ public class ChessController {
         model.setToAi(x, y, player);
     }
 
-    public void setChessByAi(int x, int y, int player){
-        int[][] chessBoard = model.getChesses();
-        model.setChess(x, y, player);
-    }
-
     public class ChessExistsException extends Exception{
 
     }
+
+
 
     public void start(){
         model.clear();
     }
 
-    public void startAi(){
-
-    }
 }

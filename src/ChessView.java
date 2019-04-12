@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.InvocationTargetException;
 
 
 public class ChessView extends JPanel implements Listener{
@@ -13,7 +14,7 @@ public class ChessView extends JPanel implements Listener{
     private JLabel la;
     private boolean isAi = false;
 
-    int turn = 1;
+    int turn = 0;
 
     public ChessView(ChessModel model, ChessController controller) {
         this.controller = controller;
@@ -37,7 +38,7 @@ public class ChessView extends JPanel implements Listener{
         JFrame jf = new JFrame();
         this.jf = jf;
         jf.setTitle("Five In A Row Version1.0");
-        jf.setSize(800, 700);
+        jf.setSize(2*model.X + model.LINE*model.SIZE + 150, 2*model.Y + model.LINE*model.SIZE);
         jf.setLocationRelativeTo(null);
 
 
@@ -111,7 +112,6 @@ public class ChessView extends JPanel implements Listener{
                     model.rollBack();
                     turn --;
                     model.rollBack();
-
                     turn --;
                 }else {
                     model.rollBack();
@@ -143,7 +143,7 @@ public class ChessView extends JPanel implements Listener{
                 turn --;
             }
 
-            turn += 2;
+            turn ++;
 
             gp.addMouseListener(mouse);
 
@@ -166,10 +166,11 @@ public class ChessView extends JPanel implements Listener{
     @Override
     public void showChange() {
         int[][] chesses = model.getChesses();
-        gp.repaint();
         gp.paintChesss(chesses);
         String player = (turn % 2) == 0 ? "White" : "Black";
-        la.setText("Current Turn: " + player);
+        if(turn != 0){
+            la.setText("Current Turn: " + player);
+        }
     }
 
     @Override
@@ -181,5 +182,13 @@ public class ChessView extends JPanel implements Listener{
             JOptionPane.showMessageDialog(null, "White Win!");
             gp.removeMouseListener(mouse);
         }
+    }
+
+    @Override
+    public void waitAi() {
+        gp.removeMouseListener(mouse);
+
+        la.setText("Waiting for AI...");
+        turn++;
     }
 }

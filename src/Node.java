@@ -242,10 +242,5 @@ public class Node {
         int[] pos = {x ,y};
         return pos;
     }
-
-    public Node getNthAncestor(int n){
-        List<Node> ancestors = getAncestors();
-        return ancestors.get(n);
-    }
 }
 

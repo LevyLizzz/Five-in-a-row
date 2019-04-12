@@ -29,12 +29,27 @@ public class ChessModel implements Config{
     }
 
     public void setToAi(int row, int column, int player) {
-        setChess(row, column, player);
+        this.chesses[row][column] = player;
+        int[] step = {row, column};
+        this.steps.add(step);
+        chessBoardChanged();
 
-        int aiPlayer = (player == 1) ? 2 : 1;
-        AiModel ai = new AiModel(aiPlayer, chesses);
-        int[] chesse = ai.getChess();
-        setChess(chesse[0], chesse[1], aiPlayer);
+        if(checkGameOver(row, column)){
+            gameOver(player);
+        } else {
+            waitAi();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int aiPlayer = (player == 1) ? 2 : 1;
+                    AiModel ai = new AiModel(aiPlayer, chesses);
+                    int[] chesse = ai.getChess();
+                    setChess(chesse[0], chesse[1], aiPlayer);
+                }
+            }).start();
+        }
+
     }
 
     public void clear(){
@@ -141,6 +156,12 @@ public class ChessModel implements Config{
         int[] step = steps.remove(length - 1);
         chesses[step[0]][step[1]] = 0;
         chessBoardChanged();
+    }
+
+    public void waitAi(){
+        for(Listener listener : lisArr){
+            listener.waitAi();
+        }
     }
 
     public int [] [] getChesses(){

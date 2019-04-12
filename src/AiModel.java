@@ -20,7 +20,6 @@ public class AiModel implements Config{
     public int[] getChess(){
         int value = tree.maxmin(root, 0, true, MINN, MAXN);
         Node node = tree.getSelectedNode();
-//        Node node = selectedNode.getNthAncestor(searchDeep - 2);
         int[] chesse = {node.x, node.y};
         return chesse;
     }

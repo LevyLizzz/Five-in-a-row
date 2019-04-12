@@ -11,7 +11,7 @@ public class MaxminTree {
         this.DEPTH = d;
         this.chesses = chesses;
     }
-    int count = 0;
+//    int count = 0;
     public void initTree(int depth, int[][] chesses, Node node, int player){
 
         for(int i = 0; i < chesses.length; i++){
@@ -25,8 +25,8 @@ public class MaxminTree {
 
                     newChesses[i][j] = player;
                     Node childNode = new Node(player, i, j, node);
-                    count++;
-                    System.out.println("# of nodes: " + count);
+//                    count++;
+//                    System.out.println("# of nodes: " + count);
                     node.addChildNode(childNode);
 
                     if(depth + 1 < DEPTH) {
@@ -58,8 +58,8 @@ public class MaxminTree {
                 alpha = Math.max(alpha, bestVal);
                 if(beta <= alpha) break;
             }
-            System.out.println(depth);
-            System.out.println(bestVal);
+//            System.out.println(depth);
+//            System.out.println(bestVal);
             return bestVal;
         }else {
             int bestVal = MAXN;
@@ -72,8 +72,8 @@ public class MaxminTree {
 
                 if(beta <= alpha) break;
             }
-            System.out.println(depth);
-            System.out.println(bestVal);
+//            System.out.println(depth);
+//            System.out.println(bestVal);
             return bestVal;
         }
     }
