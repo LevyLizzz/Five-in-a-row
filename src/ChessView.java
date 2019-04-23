@@ -1,63 +1,31 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 
-public class ChessView extends JPanel implements Listener{
-
-    private ChessController controller;
-    private ChessModel model;
+public class ChessView implements Config{
     private JFrame jf;
+    private JPanel jp;
     private GamePanel gp;
-    private MouseAdapter mouse;
     private JLabel la;
-    private boolean isAi = false;
+    private Event e;
 
-    int turn = 0;
+    private int[][] chesses;
+    private JButton jbuRoll;
 
-    public ChessView(ChessModel model, ChessController controller) {
-        this.controller = controller;
-        this.model = model;
-        this.model.register(this);
-
-        this.mouse = new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                int x = (e.getX() - model.X + model.CHESS / 2) / model.SIZE;
-                int y = (e.getY() - model.Y + model.CHESS / 2) / model.SIZE;
-                run(x, y);
-
-            }
-        };
-    }
-
-    public void initUI() {
-
+    public ChessView(Event e) {
+        this.e = e;
         JFrame jf = new JFrame();
-        this.jf = jf;
         jf.setTitle("Five In A Row Version1.0");
-        jf.setSize(2*model.X + model.LINE*model.SIZE + 150, 2*model.Y + model.LINE*model.SIZE);
+        jf.setSize(2 * X + LINE * SIZE + 150, 2 * Y + LINE * SIZE);
         jf.setLocationRelativeTo(null);
-
-
-        GamePanel gp = new GamePanel(model);
-        jf.add(gp, BorderLayout.CENTER);
-        this.gp = gp;
-
         jf.setDefaultCloseOperation(3);
-        this.setLayout(new FlowLayout());
-
-        JPanel jp2 = new JPanel();
-        jp2.setPreferredSize(new Dimension(150, 0));
-        jp2.setBackground(Color.black);
-
-        JButton jbuRoll = new JButton("Roll back");
-        jbuRoll.setPreferredSize(new Dimension(150, 50));
-
-        JButton jbuR = new JButton("Restart");
-        jbuR.setPreferredSize(new Dimension(150, 50));
+        this.jf = jf;
+        JPanel jp = new JPanel();
+        this.jp = jp;
+        jp.setPreferredSize(new Dimension(150, 0));
+        jp.setBackground(Color.black);
 
         JButton jbu2p = new JButton("2 Players Game");
         jbu2p.setPreferredSize(new Dimension(150, 50));
@@ -66,129 +34,104 @@ public class ChessView extends JPanel implements Listener{
         jbuAi.setPreferredSize(new Dimension(150, 50));
 
 
-
-        JLabel la = new JLabel("Current Turn: ");
-        la.setForeground(Color.white);
-        this.la = la;
-        jp2.add(jbu2p);
-        jp2.add(jbuAi);
-        jp2.add(jbuRoll);
-        jp2.add(jbuR);
-
-        jp2.add(la);
-
-        jf.add(jp2, BorderLayout.EAST);
-
+        JLabel label = new JLabel("Current Turn: ");
+        label.setForeground(Color.white);
+        this.la = label;
+        jp.add(jbu2p);
+        jp.add(jbuAi);
+        jp.add(label);
+        jf.getContentPane().add(jp, BorderLayout.EAST);
         jf.setVisible(true);
 
         ActionListener btnListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String action  = e.getActionCommand();
-                btnAction(action);
+                switch (e.getActionCommand())
+                {
+                    case "2 Players Game":
+                        initGameBoard(false);
+                        break;
+                    case "Play with AI":
+                        initGameBoard(true);
+                        break;
+
+                }
             }
         };
 
         jbu2p.addActionListener(btnListener);
-        jbuRoll.addActionListener(btnListener);
-        jbuR.addActionListener(btnListener);
         jbuAi.addActionListener(btnListener);
     }
 
 
-    // merge into privious code
-    public void btnAction(String action) {
-        if (action.equals("2 Players Game")) {
-            isAi = false;
-            controller.start();
-            turn = 1;
-        } else if (action.equals("Play with AI")) {
-            isAi = true;
-            controller.start();
-            turn = 1;
-        } else if (action.equals("Roll back")) {
-            if(turn > 1){
-                if(isAi){
-                    model.rollBack();
-                    turn --;
-                    model.rollBack();
-                    turn --;
-                }else {
-                    model.rollBack();
-                    turn --;
+    private void initGameBoard(boolean isAi){
+        if(gp != null){
+            jf.remove(gp);
+            jf.validate();
+        }
+        if(jbuRoll != null){
+            jp.remove(jbuRoll);
+            jp.validate();
+        }
+        GamePanel gp = new GamePanel();
+        jf.getContentPane().add(gp, BorderLayout.CENTER);
+        this.gp = gp;
+        //intialize Event
+        e.clear();
+        JButton jbuRoll = new JButton("Roll back");
+        jbuRoll.setPreferredSize(new Dimension(150, 50));
+        this.jbuRoll = jbuRoll;
+        jp.add(jbuRoll);
+        jp.repaint();
+        jf.getContentPane().add(jp, BorderLayout.EAST);
+        jf.validate();
+
+        ChessController controller = new ChessController(e, this, isAi);
+
+        jbuRoll.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    controller.rollBack();
+                }catch (ChessController.ChessRollBackException err){
+                    alert("Unable to roll back!");
                 }
-
             }
-
-        } else if(action.equals("Restart")){
-            controller.start();
-            turn = 1;
-        }
-        gp.removeMouseListener(mouse);
-        gp.addMouseListener(mouse);
+        });
+        jf.repaint();
     }
 
 
-    public void run(int x, int y){
-        if(isAi){
-            gp.removeMouseListener(mouse);
-            int player = turn % 2 + 1;
-
-            try {
-                controller.setToAi(x, y, player);
-            } catch (ChessController.ChessExistsException e) {
-                JOptionPane.showMessageDialog(null, "Chess Exists!");
-                turn --;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                turn --;
-            }
-
-            turn ++;
-
-            gp.addMouseListener(mouse);
-
-        } else {
-            int player = turn % 2 + 1;
-
-            try {
-                controller.setChess(x, y, player);
-            } catch (ChessController.ChessExistsException e) {
-                JOptionPane.showMessageDialog(null, "Chess Exists!");
-                turn --;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                turn --;
-            }
-
-            turn ++;
-        }
+    public void bindMouseListenr(MouseAct m){
+        gp.addMouseListener(m);
     }
 
-    @Override
-    public void showChange() {
-        int[][] chesses = model.getChesses();
+    public void unbindMouseListenr(MouseAct m){
+        gp.removeMouseListener(m);
+    }
+
+
+    public void alert(String msg){
+        JOptionPane.showMessageDialog(null, msg);
+    }
+
+    public void waitAi(){
+        la.setText("AI is running...");
+    }
+
+    public void setChesses(int[][] chesses, int player){
+        this.chesses = chesses;
         gp.paintChesss(chesses);
-        String player = (turn % 2) == 0 ? "White" : "Black";
-        if(turn != 0){
-            la.setText("Current Turn: " + player);
-        }
+        String turn = (player % 2) == 0 ? "White" : "Black";
+        la.setText("Current Turn: " + turn);
     }
 
-    @Override
-    public void gameOver(int player) {
+    public void gameOverBy(int player) {
         if (player == 2) {
             JOptionPane.showMessageDialog(null, "Black Win!");
-            gp.removeMouseListener(mouse);
         } else {
             JOptionPane.showMessageDialog(null, "White Win!");
-            gp.removeMouseListener(mouse);
         }
     }
 
-    @Override
-    public void waitAi() {
-        gp.removeMouseListener(mouse);
-
-        la.setText("Waiting for AI...");
-        turn++;
-    }
 }

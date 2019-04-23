@@ -1,5 +1,4 @@
 public interface Listener{
-    void showChange();
+    void showChange(int[] step, int player);
     void gameOver(int player);
-    void waitAi();
 }

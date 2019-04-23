@@ -1,17 +1,16 @@
 import java.util.List;
 
-public class MaxminTree {
+public class MinmaxTree {
     private int DEPTH;
     private int[][] chesses;
     public static final int MAXN = 1<<28;
     public static final int MINN = -MAXN;
     private Node selectedNode;
 
-    public MaxminTree(int d, int[][] chesses){
+    public MinmaxTree(int d, int[][] chesses){
         this.DEPTH = d;
         this.chesses = chesses;
     }
-//    int count = 0;
     public void initTree(int depth, int[][] chesses, Node node, int player){
 
         for(int i = 0; i < chesses.length; i++){
@@ -25,12 +24,11 @@ public class MaxminTree {
 
                     newChesses[i][j] = player;
                     Node childNode = new Node(player, i, j, node);
-//                    count++;
-//                    System.out.println("# of nodes: " + count);
+
                     node.addChildNode(childNode);
 
                     if(depth + 1 < DEPTH) {
-                        // switch player
+                        // switch Player
                         int newPlayer = (player == 1) ? 2 : 1;
                         initTree(depth + 1, newChesses, childNode, newPlayer);
                     }
@@ -58,8 +56,6 @@ public class MaxminTree {
                 alpha = Math.max(alpha, bestVal);
                 if(beta <= alpha) break;
             }
-//            System.out.println(depth);
-//            System.out.println(bestVal);
             return bestVal;
         }else {
             int bestVal = MAXN;
@@ -72,8 +68,6 @@ public class MaxminTree {
 
                 if(beta <= alpha) break;
             }
-//            System.out.println(depth);
-//            System.out.println(bestVal);
             return bestVal;
         }
     }

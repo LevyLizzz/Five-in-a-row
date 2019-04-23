@@ -1,66 +1,21 @@
 import java.util.ArrayList;
 
 
-public class ChessModel implements Config{
+public class ChessModel implements Config, Listener{
     private int[][] chesses = new int[LINE][LINE];
-    private ArrayList<Listener> lisArr = new ArrayList<Listener>();
-    private ArrayList<int[]> steps = new ArrayList<int[]>();
+    private Event e;
 
 
-    public ChessModel(){
+    public ChessModel(Event e){
         for(int i = 0; i < LINE; i++){
             for(int j = 0; j < LINE; j++) {
                 chesses[i][j] = 0;
             }
         }
+        this.e = e;
+        e.register(this);
     }
 
-
-    public void register(Listener listner){
-        lisArr.add(listner);
-    }
-
-    public void setChess(int row, int column, int player) {
-        this.chesses[row][column] = player;
-        int[] step = {row, column};
-        this.steps.add(step);
-        chessBoardChanged();
-        if(checkGameOver(row, column)) gameOver(player);
-    }
-
-    public void setToAi(int row, int column, int player) {
-        this.chesses[row][column] = player;
-        int[] step = {row, column};
-        this.steps.add(step);
-        chessBoardChanged();
-
-        if(checkGameOver(row, column)){
-            gameOver(player);
-        } else {
-            waitAi();
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    int aiPlayer = (player == 1) ? 2 : 1;
-                    AiModel ai = new AiModel(aiPlayer, chesses);
-                    int[] chesse = ai.getChess();
-                    setChess(chesse[0], chesse[1], aiPlayer);
-                }
-            }).start();
-        }
-
-    }
-
-    public void clear(){
-        for(int i = 0; i < LINE; i++){
-            for(int j = 0; j < LINE; j++){
-                chesses[i][j] = 0;
-            }
-        }
-        steps.clear();
-        chessBoardChanged();
-    }
 
     private boolean checkGameOver(int row, int column){
         boolean over = false;
@@ -139,32 +94,15 @@ public class ChessModel implements Config{
         return  (count >= 5);
     }
 
-    private void chessBoardChanged(){
-        for(Listener listener : lisArr){
-            listener.showChange();
+    @Override
+    public void showChange(int[] step, int player){
+        chesses[step[0]][step[1]] = player;
+        if(player != 0){
+            if(checkGameOver(step[0], step[1])) e.gameOver(player);
         }
-    }
 
-    private void gameOver(int player){
-        for(Listener listener : lisArr){
-            listener.gameOver(player);
-        }
     }
+    public void gameOver(int player){
 
-    public void rollBack() {
-        int length = steps.size();
-        int[] step = steps.remove(length - 1);
-        chesses[step[0]][step[1]] = 0;
-        chessBoardChanged();
-    }
-
-    public void waitAi(){
-        for(Listener listener : lisArr){
-            listener.waitAi();
-        }
-    }
-
-    public int [] [] getChesses(){
-        return this.chesses;
     }
 }
